@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#176b5d">
+  <meta name="description" content="Atmos brings weather, air quality, daily planning and agriculture-aware guidance into one personalised dashboard.">
+  <title>Atmos — Weather intelligence for everyday life</title>
+  <link rel="preconnect" href="https://api.open-meteo.com">
+  <link rel="preconnect" href="https://air-quality-api.open-meteo.com">
+  <link rel="preconnect" href="https://geocoding-api.open-meteo.com">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+      <a class="brand" href="#home" data-nav="home" aria-label="Atmos home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M7 30c0-7 5-12 12-12 2-7 8-11 15-8 6 2 9 8 8 14 4 2 6 5 6 9 0 6-5 10-12 10H17C11 43 7 38 7 30Z" fill="currentColor" opacity=".17"/><path d="M8 29c0-6 5-10 11-10 2-7 8-10 14-7 5 2 8 7 7 13 4 1 6 4 6 8 0 5-4 9-10 9H17C11 42 8 37 8 29Z" fill="none" stroke="currentColor" stroke-width="2.3"/><path d="M16 34c4-2 7-6 9-12 1 8 4 12 9 13M25 22v16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3"/></svg></span>
+        <span class="brand-copy"><strong>atmos</strong><small>weather intelligence</small></span>
+      </a>
+
+      <div class="sidebar-label" data-i18n="workspace">WORKSPACE</div>
+      <nav class="primary-nav" aria-label="App sections">
+        <button class="nav-link active" data-nav="home" type="button"><span class="nav-icon">⌂</span><span data-i18n="navHome">Overview</span></button>
+        <button class="nav-link" data-nav="compare" type="button"><span class="nav-icon">⇄</span><span data-i18n="navCompare">Compare places</span><span class="nav-count" id="compareNavCount">3</span></button>
+        <button class="nav-link" data-nav="farm" type="button"><span class="nav-icon">♧</span><span data-i18n="navFarm">Farm planner</span><span class="nav-tag">PRO</span></button>
+        <button class="nav-link" data-nav="planner" type="button"><span class="nav-icon">▦</span><span data-i18n="navPlanner">My day</span></button>
+        <button class="nav-link" data-nav="favorites" type="button"><span class="nav-icon">☆</span><span data-i18n="navFavorites">Saved places</span></button>
+      </nav>
+
+      <div class="sidebar-label second-label" data-i18n="personal">PERSONAL</div>
+      <nav class="primary-nav" aria-label="Personal settings">
+        <button class="nav-link" data-nav="settings" type="button"><span class="nav-icon">⚙</span><span data-i18n="navSettings">Preferences</span></button>
+      </nav>
+
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-help">
+        <div class="help-orb" aria-hidden="true">✳</div>
+        <strong data-i18n="helpTitle">Make each day count</strong>
+        <p data-i18n="helpText">Use local conditions to plan your next move with more confidence.</p>
+        <button type="button" class="text-button" data-nav="settings"><span data-i18n="personalize">Personalise Atmos</span><span aria-hidden="true"> ↗</span></button>
+      </div>
+      <div class="sidebar-footer"><span class="status-dot"></span><span data-i18n="freeData">Public forecast data</span><span class="tiny-info" title="Forecast models are estimates, not official station observations.">ⓘ</span></div>
+    </aside>
+
+    <div class="main-column">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu icon-only" id="mobileMenuButton" type="button" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+          <div class="breadcrumb"><span data-i18n="breadcrumbHome">Workspace</span><span class="crumb-divider">/</span><strong id="pageTitle" data-i18n="navHome">Overview</strong></div>
+        </div>
+        <div class="topbar-actions">
+          <div class="live-pill"><span class="pulse-dot"></span><span data-i18n="liveDashboard">Live dashboard</span></div>
+          <button class="icon-only" id="refreshButton" type="button" title="Refresh weather data" aria-label="Refresh weather data">↻</button>
+          <button class="profile-button" id="profileQuickButton" type="button" aria-label="Open personal preferences"><span class="avatar" id="profileAvatar">✳</span><span class="profile-button-copy"><strong id="profileQuickLabel">Everyday</strong><small data-i18n="yourSpace">Your space</small></span><span aria-hidden="true">⌄</span></button>
+        </div>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <div class="global-status" id="globalStatus" role="status" aria-live="polite" hidden></div>
+
+        <!-- UNIVERSAL EVERYDAY HOMEPAGE -->
+        <section class="page-section active" id="page-home" data-page="home">
+          <div class="page-intro intro-row">
+            <div>
+              <p class="eyebrow"><span class="eyebrow-spark">✳</span> <span data-i18n="overviewEyebrow">YOUR DAY, IN CONTEXT</span></p>
+              <h1><span data-i18n="goodDay">Make today a</span> <em data-i18n="littleClearer">little clearer.</em></h1>
+              <p class="intro-copy" data-i18n="overviewIntro">Weather, air quality and helpful plans for wherever life takes you.</p>
+            </div>
+            <div class="date-chip"><span class="date-chip-icon">▦</span><span><strong id="todayDate">Today</strong><small id="todayTime">Local time</small></span></div>
+          </div>
+
+          <div class="location-toolbar surface">
+            <div class="location-current"><span class="pin-bubble">⌖</span><div><span class="mini-label" data-i18n="weatherFor">WEATHER FOR</span><strong id="homeLocationLabel">Panipat, Haryana, India</strong></div></div>
+            <form id="homeLocationForm" class="location-search" autocomplete="off">
+              <label class="sr-only" for="homeLocationInput" data-i18n="searchLocation">Search city or postal code</label>
+              <span aria-hidden="true">⌕</span><input id="homeLocationInput" type="search" minlength="2" placeholder="Search a city or postal code" data-i18n-placeholder="searchPlaceholder">
+              <button class="button button-dark button-small" type="submit" id="homeLocationSearchButton" data-i18n="search">Search</button>
+            </form>
+            <button type="button" id="useMyLocationButton" class="button button-soft button-small"><span aria-hidden="true">◎</span> <span data-i18n="useMyLocation">Use my location</span></button>
+            <button type="button" id="homeFavoriteButton" class="favorite-toggle" aria-pressed="false" title="Save this location">☆</button>
+            <div class="search-results floating-results" id="homeSearchResults" hidden></div>
+          </div>
+
+          <div class="dashboard-grid top-dashboard-grid">
+            <article class="weather-hero card card-dark">
+              <div class="weather-hero-backdrop" aria-hidden="true"><span class="weather-glow glow-one"></span><span class="weather-glow glow-two"></span><span class="weather-cloud cloud-one">☁</span><span class="weather-cloud cloud-two">☁</span></div>
+              <div class="weather-hero-top"><div><span class="weather-kicker" data-i18n="currentConditions">CURRENT CONDITIONS</span><h2 id="heroCityName">Panipat</h2><p id="heroLocalMeta">Haryana, India · local forecast</p></div><div class="weather-symbol" id="heroWeatherIcon" aria-hidden="true">☀</div></div>
+              <div class="hero-temperature-row"><div class="hero-temperature"><span id="heroTemperature">—</span><sup id="heroTempUnit">°C</sup></div><div class="hero-condition"><strong id="heroWeatherDescription">Loading conditions…</strong><span><span data-i18n="feelsLike">Feels like</span> <b id="heroFeelsLike">—</b></span><span id="heroHighLow">H —° / L —°</span></div></div>
+              <div class="hero-divider"></div>
+              <div class="hero-bottom-stats">
+                <div><span class="hero-stat-icon">☂</span><span class="hero-stat-label" data-i18n="rainChance">Rain chance</span><strong id="heroRainChance">—</strong></div>
+                <div><span class="hero-stat-icon">↗</span><span class="hero-stat-label" data-i18n="wind">Wind</span><strong id="heroWind">—</strong></div>
+                <div><span class="hero-stat-icon">☼</span><span class="hero-stat-label" data-i18n="uvIndex">UV index</span><strong id="heroUV">—</strong></div>
+              </div>
+              <div class="hero-source"><span class="source-dot"></span><span data-i18n="modelBased">Forecast model · updates when refreshed</span></div>
+            </article>
+
+            <article class="card air-card">
+              <div class="card-heading"><div><p class="eyebrow" data-i18n="airQualityEyebrow">BREATHING SPACE</p><h2 data-i18n="airQuality">Air quality</h2></div><span class="card-heading-icon air-icon">≈</span></div>
+              <p class="muted-text" data-i18n="airQualityBasis">Modelled European Air Quality Index</p>
+              <div class="aqi-main"><div class="aqi-number" id="heroAQI">—</div><div><span class="aqi-badge" id="heroAQIBadge">Loading</span><p class="aqi-guidance" id="heroAQIGuidance">Fetching the latest available estimate.</p></div></div>
+              <div class="aqi-scale" aria-label="European air quality index scale"><span class="aqi-scale-segment good"></span><span class="aqi-scale-segment fair"></span><span class="aqi-scale-segment moderate"></span><span class="aqi-scale-segment poor"></span><span class="aqi-scale-segment very-poor"></span><span class="aqi-scale-segment extreme"></span></div>
+              <div class="aqi-scale-labels"><span>Good</span><span>Moderate</span><span>Extreme</span></div>
+              <div class="pollutant-grid"><div><span>PM2.5</span><strong id="heroPM25">—</strong><small>µg/m³</small></div><div><span>PM10</span><strong id="heroPM10">—</strong><small>µg/m³</small></div><div><span>US AQI</span><strong id="heroUSAQI">—</strong><small data-i18n="separateIndex">separate index</small></div></div>
+              <div class="card-footnote" data-i18n="airDisclaimer">Air-quality values are model estimates, not official station readings.</div>
+            </article>
+          </div>
+
+          <div class="section-heading section-heading-space"><div><p class="eyebrow" data-i18n="planAheadEyebrow">STAY ONE STEP AHEAD</p><h2 data-i18n="todayAtGlance">Today at a glance</h2></div><button type="button" class="text-button" data-nav="planner"><span data-i18n="openDailyPlanner">Open daily planner</span> <span aria-hidden="true">↗</span></button></div>
+          <div class="quick-metric-grid">
+            <article class="quick-metric card"><div class="metric-icon icon-rain">☂</div><div class="metric-content"><span data-i18n="precipitation">Precipitation</span><strong id="metricRain">—</strong><small id="metricRainNote">Next 24 hours</small></div><span class="metric-mini-arrow">↗</span></article>
+            <article class="quick-metric card"><div class="metric-icon icon-wind">≋</div><div class="metric-content"><span data-i18n="windGusts">Wind gusts</span><strong id="metricGusts">—</strong><small data-i18n="peakForecast">Peak forecast</small></div><span class="metric-mini-arrow">↗</span></article>
+            <article class="quick-metric card"><div class="metric-icon icon-uv">☼</div><div class="metric-content"><span data-i18n="sunExposure">Sun exposure</span><strong id="metricUV">—</strong><small id="metricUVNote">UV forecast</small></div><span class="metric-mini-arrow">↗</span></article>
+            <article class="quick-metric card"><div class="metric-icon icon-daylight">◷</div><div class="metric-content"><span data-i18n="daylight">Daylight</span><strong id="metricDaylight">—</strong><small data-i18n="sunriseToSunset">Sunrise to sunset</small></div><span class="metric-mini-arrow">↗</span></article>
+          </div>
+
+          <div class="section-heading section-heading-space"><div><p class="eyebrow" data-i18n="smartSuggestionsEyebrow">SMALL ADVANTAGES, EVERY DAY</p><h2 data-i18n="suggestionsForYou">Suggestions for you</h2><p class="section-subtitle" id="recommendationSubheading" data-i18n="suggestionsDefaultSub">Useful ideas based on local conditions. Personalisation is optional.</p></div><button type="button" class="button button-outline button-small" data-nav="settings" data-i18n="tuneSuggestions">Tune suggestions</button></div>
+          <div class="recommendations-grid" id="recommendationsGrid" aria-live="polite"></div>
+
+          <div class="dashboard-grid lower-dashboard-grid">
+            <article class="card chart-card main-chart-card">
+              <div class="card-heading"><div><p class="eyebrow" data-i18n="nextHoursEyebrow">THE NEXT 24 HOURS</p><h2 data-i18n="hourlyOutlook">Hourly outlook</h2></div><select id="hourlyChartMode" class="select-compact" aria-label="Hourly chart display"><option value="temperature">Temperature</option><option value="rain">Rain chance</option><option value="wind">Wind speed</option></select></div>
+              <p class="muted-text" data-i18n="hourlyChartNote">Follow how local conditions may change through the day.</p>
+              <div class="chart-container chart-tall"><canvas id="hourlyWeatherChart" aria-label="Hourly weather forecast chart"></canvas><div class="chart-fallback" id="hourlyChartFallback" hidden>Chart library unavailable. Forecast details remain available below.</div></div>
+              <div class="chart-caption"><span><span class="legend-dot legend-teal"></span><span id="hourlyLegendLabel">Temperature (°C)</span></span><span data-i18n="timesLocal">Times shown in local time</span></div>
+            </article>
+            <article class="card alert-card">
+              <div class="card-heading"><div><p class="eyebrow" data-i18n="headsUpEyebrow">PLAN WITH A LITTLE MORE NOTICE</p><h2 data-i18n="weatherHeadsUp">Weather heads-up</h2></div><span class="card-heading-icon alert-heading-icon">!</span></div>
+              <p class="muted-text" data-i18n="headsUpNote">Helpful thresholds based on the current forecast, not official emergency alerts.</p>
+              <div id="weatherAlertsList" class="weather-alerts-list"><div class="loading-line"></div><div class="loading-line short"></div></div>
+              <div class="card-footnote" data-i18n="alertDisclaimer">Always follow local authorities for official warnings.</div>
+            </article>
+          </div>
+
+          <div class="section-heading section-heading-space forecast-heading"><div><p class="eyebrow" data-i18n="weekViewEyebrow">AHEAD OF THE CURVE</p><h2 data-i18n="sevenDayForecast">7-day forecast</h2></div><span class="updated-chip" id="lastUpdatedLabel">—</span></div>
+          <div class="forecast-strip" id="forecastList"><div class="forecast-loading">Loading the forecast…</div></div>
+
+          <div class="setup-banner card" id="setupBanner">
+            <div class="setup-banner-icon">✳</div><div class="setup-banner-copy"><span class="mini-label" data-i18n="optionalPersonalization">OPTIONAL PERSONALISATION</span><h3 data-i18n="makeItYours">Make Atmos work for your life.</h3><p data-i18n="personalizationPitch">Choose what matters to you, or let the dashboard adapt gradually to the sections you use.</p></div><div class="setup-banner-actions"><button type="button" class="button button-dark" id="openSetupButton" data-i18n="quickSetup">Quick setup</button><button type="button" class="text-button" id="dismissSetupButton" data-i18n="maybeLater">Maybe later</button></div>
+          </div>
+        </section>
+
+        <!-- PLACE COMPARISON -->
+        <section class="page-section" id="page-compare" data-page="compare" hidden>
+          <div class="page-intro"><p class="eyebrow" data-i18n="compareEyebrow">SEE THE DIFFERENCE</p><h1 data-i18n="compareTitle">Compare places, <em>side by side.</em></h1><p class="intro-copy" data-i18n="compareIntro">Compare weather and air-quality conditions across up to six locations.</p></div>
+          <div class="card compare-search-card"><form id="compareLocationForm" class="compare-search-form" autocomplete="off"><label for="compareLocationInput" data-i18n="addPlaceToCompare">Add a place to compare</label><div class="compare-search-row"><div class="input-with-icon"><span>⌕</span><input id="compareLocationInput" type="search" minlength="2" placeholder="Search city, region or postal code" data-i18n-placeholder="compareSearchPlaceholder"></div><button class="button button-dark" type="submit" id="compareSearchButton" data-i18n="findPlace">Find place</button></div><div class="search-results inline-results" id="compareSearchResults" hidden></div></form><div class="compare-toolbar"><span id="compareLimitText">3 of 6 locations selected</span><button type="button" class="text-button" id="resetCompareButton" data-i18n="resetPlaces">Reset places</button></div></div>
+          <div class="comparison-grid" id="comparisonGrid"><div class="empty-state">Loading comparison data…</div></div>
+          <div class="dashboard-grid compare-charts-grid"><article class="card chart-card"><div class="card-heading"><div><p class="eyebrow" data-i18n="compareTrendsEyebrow">WEATHER COMPARISON</p><h2 data-i18n="temperatureTrend">Temperature trends</h2></div></div><p class="muted-text" data-i18n="compareTrendNote">Hourly temperature for each selected location.</p><div class="chart-container"><canvas id="compareTemperatureChart" aria-label="Temperature comparison chart"></canvas></div></article><article class="card chart-card"><div class="card-heading"><div><p class="eyebrow" data-i18n="airCompareEyebrow">AIR QUALITY COMPARISON</p><h2 data-i18n="aqiTrend">European AQI trends</h2></div></div><p class="muted-text" data-i18n="aqiTrendNote">Modelled air-quality index by location.</p><div class="chart-container"><canvas id="compareAQIChart" aria-label="Air quality comparison chart"></canvas></div></article></div>
+          <div class="card data-note-card"><span class="note-icon">ⓘ</span><div><strong data-i18n="comparisonNoteTitle">A note on comparisons</strong><p data-i18n="comparisonNoteText">Forecasts are model-based estimates. European AQI and US AQI use different scales; compare like with like. Actual conditions may differ from these estimates.</p></div></div>
+        </section>
+
+        <!-- FARM PLANNER -->
+        <section class="page-section" id="page-farm" data-page="farm" hidden>
+          <div class="page-intro"><p class="eyebrow" data-i18n="farmEyebrow">WEATHER-AWARE FIELD PLANNING</p><h1 data-i18n="farmTitle">A little more certainty <em>for the field.</em></h1><p class="intro-copy" data-i18n="farmIntro">Use your local forecast to plan weather-sensitive farm activities. Suggestions are general planning aids, not agronomic guarantees.</p></div>
+          <div class="farm-hero card"><div class="farm-hero-art"><div class="sun-disc"></div><div class="field field-back"></div><div class="field field-mid"></div><div class="field field-front"></div><span class="farm-sprout">♧</span></div><div class="farm-hero-copy"><p class="eyebrow" data-i18n="fieldBriefEyebrow">YOUR FIELD BRIEF</p><h2 id="farmBriefTitle">Start with your field and crop.</h2><p id="farmBriefText">Add a few details to turn the local weather forecast into more relevant planning prompts.</p><div class="farm-context-chips"><span id="farmCropChip">No crop selected</span><span id="farmLocationChip">Panipat</span></div></div></div>
+          <div class="farm-layout-grid"><form class="card form-card" id="farmProfileForm"><div class="card-heading"><div><p class="eyebrow" data-i18n="fieldProfileEyebrow">A FEW DETAILS</p><h2 data-i18n="fieldProfileTitle">Your field profile</h2></div><span class="card-heading-icon farm-form-icon">♧</span></div><p class="muted-text" data-i18n="farmProfileHelp">These details stay in this browser unless you choose to export or share them.</p>
+            <div class="form-grid"><div class="form-field"><label for="farmCrop" data-i18n="crop">Crop</label><select id="farmCrop"><option value="">Select a crop</option><option value="wheat">Wheat</option><option value="rice">Rice / paddy</option><option value="maize">Maize</option><option value="mustard">Mustard / rapeseed</option><option value="cotton">Cotton</option><option value="vegetables">Vegetables</option><option value="orchard">Fruit / orchard</option><option value="other">Other / mixed crop</option></select></div><div class="form-field"><label for="farmStage" data-i18n="growthStage">Growth stage</label><select id="farmStage"><option value="planning">Planning / preparation</option><option value="sowing">Sowing / transplanting</option><option value="vegetative">Vegetative growth</option><option value="flowering">Flowering / fruiting</option><option value="maturity">Maturity / harvest</option><option value="postharvest">Post-harvest</option></select></div><div class="form-field"><label for="farmArea" data-i18n="fieldArea">Field area</label><div class="unit-input"><input id="farmArea" type="number" min="0" step="0.1" placeholder="e.g. 2"><select id="farmAreaUnit" aria-label="Area unit"><option value="ha">ha</option><option value="acre">acres</option></select></div></div><div class="form-field"><label for="farmSoil" data-i18n="soilType">Soil type (optional)</label><select id="farmSoil"><option value="unknown">Not sure / not set</option><option value="sandy">Sandy</option><option value="loamy">Loamy</option><option value="clay">Clay</option><option value="silt">Silty</option><option value="mixed">Mixed / other</option></select></div><div class="form-field full-field"><label for="farmIrrigation" data-i18n="irrigationMethod">Irrigation situation</label><select id="farmIrrigation"><option value="rainfed">Mostly rain-fed</option><option value="drip">Drip irrigation</option><option value="sprinkler">Sprinkler</option><option value="flood">Flood / furrow</option><option value="mixed">Mixed / other</option></select></div><div class="form-field full-field"><label for="farmTask" data-i18n="nextFarmTask">Activity you are planning</label><select id="farmTask"><option value="irrigation">Irrigation</option><option value="spraying">Spraying / foliar application</option><option value="sowing">Sowing / transplanting</option><option value="harvesting">Harvesting / drying</option><option value="fieldwork">General field work</option><option value="inspection">Crop inspection</option></select></div></div>
+            <div class="form-actions"><button class="button button-dark" type="submit" data-i18n="saveFieldProfile">Save field profile</button><button class="button button-outline" id="clearFarmProfileButton" type="button" data-i18n="clear">Clear</button></div><p class="form-feedback" id="farmFormFeedback" role="status" aria-live="polite"></p>
+          </form>
+          <div class="farm-insights-column"><article class="card farm-insights-card"><div class="card-heading"><div><p class="eyebrow" data-i18n="weatherWindowsEyebrow">FORECAST-AWARE PROMPTS</p><h2 data-i18n="fieldInsights">Field insights</h2></div><span class="card-heading-icon">✧</span></div><div id="farmInsights" class="insight-list"><div class="empty-state compact-empty">Save a crop profile to see planning prompts.</div></div></article><article class="card farm-checklist-card"><div class="card-heading"><div><p class="eyebrow" data-i18n="fieldChecklistEyebrow">BEFORE YOU HEAD OUT</p><h2 data-i18n="fieldChecklist">Field checklist</h2></div></div><div id="farmChecklist" class="checklist-list"><label class="check-row"><input type="checkbox"><span>Review local forecast before starting work.</span></label><label class="check-row"><input type="checkbox"><span>Check field moisture and actual crop conditions.</span></label><label class="check-row"><input type="checkbox"><span>Follow crop-specific local guidance and product labels.</span></label></div><p class="card-footnote" data-i18n="farmSafetyNote">Weather alone cannot determine crop needs. Confirm decisions with field observations and trusted local agricultural guidance.</p></article></div></div>
+        </section>
+
+        <!-- DAILY PLANNER -->
+        <section class="page-section" id="page-planner" data-page="planner" hidden>
+          <div class="page-intro"><p class="eyebrow" data-i18n="plannerEyebrow">MAKE ROOM FOR WHAT MATTERS</p><h1 data-i18n="plannerTitle">Plan your day, <em>not just the weather.</em></h1><p class="intro-copy" data-i18n="plannerIntro">Create a simple weather-aware task list. Your tasks are stored locally in this browser.</p></div>
+          <div class="planner-summary-grid"><article class="card planner-summary"><span class="summary-icon">▦</span><div><span data-i18n="tasksToday">Tasks in your list</span><strong id="taskTotal">0</strong></div></article><article class="card planner-summary"><span class="summary-icon summary-green">✓</span><div><span data-i18n="tasksDone">Completed</span><strong id="taskCompleted">0</strong></div></article><article class="card planner-summary"><span class="summary-icon summary-orange">☼</span><div><span data-i18n="weatherSensitiveTasks">Weather-sensitive</span><strong id="taskWeatherSensitiveTotal">0</strong></div></article></div>
+          <div class="planner-layout"><form id="taskForm" class="card task-form-card"><div class="card-heading"><div><p class="eyebrow" data-i18n="newTaskEyebrow">MAKE A PLAN</p><h2 data-i18n="addTask">Add a task</h2></div><span class="card-heading-icon">＋</span></div><div class="form-field"><label for="taskTitle" data-i18n="taskTitle">Task name</label><input id="taskTitle" type="text" maxlength="100" required placeholder="e.g. Walk to campus, water plants…" data-i18n-placeholder="taskPlaceholder"></div><div class="form-grid"><div class="form-field"><label for="taskCategory" data-i18n="category">Category</label><select id="taskCategory"><option value="personal">Personal</option><option value="commute">Commute</option><option value="study">Study / campus</option><option value="outdoor">Outdoor work</option><option value="farm">Farm</option><option value="home">Home</option><option value="business">Business</option></select></div><div class="form-field"><label for="taskTime" data-i18n="time">Time</label><input id="taskTime" type="time"></div><div class="form-field full-field"><label for="taskDate" data-i18n="date">Date</label><input id="taskDate" type="date"></div></div><label class="check-row task-weather-check"><input type="checkbox" id="taskWeatherSensitive"><span data-i18n="weatherAwareTask">This task depends on the weather</span></label><button class="button button-dark button-wide" type="submit" data-i18n="addToPlan">Add to my plan</button><p id="taskFormFeedback" class="form-feedback" role="status"></p></form>
+            <section class="card task-list-card"><div class="card-heading"><div><p class="eyebrow" data-i18n="yourScheduleEyebrow">YOUR PERSONAL CHECKLIST</p><h2 data-i18n="yourTasks">Your tasks</h2></div><div class="task-filters"><button type="button" class="filter-pill active" data-task-filter="all" data-i18n="allTasks">All</button><button type="button" class="filter-pill" data-task-filter="open" data-i18n="toDo">To do</button><button type="button" class="filter-pill" data-task-filter="done" data-i18n="completed">Done</button></div></div><div id="taskList" class="task-list"><div class="empty-state"><span>✧</span><strong>No tasks yet</strong><p>Add a task and let Atmos help you prepare for the day.</p></div></div><div class="task-list-footer"><button type="button" class="text-button danger-text" id="clearCompletedTasksButton" data-i18n="clearCompleted">Clear completed tasks</button><span id="taskListFooterCount">0 tasks</span></div></section></div>
+        </section>
+
+        <!-- SAVED PLACES -->
+        <section class="page-section" id="page-favorites" data-page="favorites" hidden>
+          <div class="page-intro"><p class="eyebrow" data-i18n="savedEyebrow">PLACES YOU CARE ABOUT</p><h1 data-i18n="savedTitle">Your saved <em>places.</em></h1><p class="intro-copy" data-i18n="savedIntro">Keep an eye on your home, field, campus, workplace or anywhere else that matters.</p></div>
+          <div class="card saved-place-card"><div class="card-heading"><div><p class="eyebrow" data-i18n="favoritesEyebrow">QUICK ACCESS</p><h2 data-i18n="favoriteLocations">Favourite locations</h2></div><span class="card-heading-icon">☆</span></div><div id="favoritesGrid" class="favorites-grid"><div class="empty-state"><span>☆</span><strong>No saved places yet</strong><p>Save a place from the overview or comparison page to see it here.</p></div></div></div>
+          <div class="card compare-shortcut"><div class="shortcut-icon">⇄</div><div><strong data-i18n="needCompare">Need to compare different places?</strong><p data-i18n="compareShortcutText">Add up to six locations to compare their current weather and trends.</p></div><button class="button button-dark" type="button" data-nav="compare" data-i18n="comparePlaces">Compare places</button></div>
+        </section>
+
+        <!-- PREFERENCES / PERSONALISATION -->
+        <section class="page-section" id="page-settings" data-page="settings" hidden>
+          <div class="page-intro"><p class="eyebrow" data-i18n="settingsEyebrow">YOUR EXPERIENCE, YOUR CALL</p><h1 data-i18n="settingsTitle">Make Atmos <em>yours.</em></h1><p class="intro-copy" data-i18n="settingsIntro">Tell us what is useful. You can change these choices or reset the experience whenever you like.</p></div>
+          <div class="settings-layout"><div class="settings-main-column">
+            <form class="card settings-card" id="preferencesForm"><div class="card-heading"><div><p class="eyebrow" data-i18n="personalPreferencesEyebrow">YOUR PREFERENCES</p><h2 data-i18n="personalPreferences">Personal preferences</h2></div><span class="card-heading-icon">⚙</span></div><div class="settings-fields-grid"><div class="form-field"><label for="languageSelect" data-i18n="interfaceLanguage">Interface language</label><select id="languageSelect"><option value="en">English</option><option value="hi">हिन्दी — Hindi</option><option value="pa">ਪੰਜਾਬੀ — Punjabi</option></select></div><div class="form-field"><label for="profileSelect" data-i18n="mainExperience">Main experience</label><select id="profileSelect"><option value="everyday">Everyday life</option><option value="farmer">Farm & agriculture</option><option value="student">School / college</option><option value="commuter">Commuting / office</option><option value="outdoor">Outdoor work</option><option value="delivery">Delivery / driving</option><option value="business">Shop / small business</option><option value="home">Home & family</option></select></div><div class="form-field"><label for="temperatureUnit" data-i18n="temperatureUnit">Temperature unit</label><select id="temperatureUnit"><option value="C">Celsius (°C)</option><option value="F">Fahrenheit (°F)</option></select></div><div class="form-field"><label for="windUnit" data-i18n="windSpeedUnit">Wind speed unit</label><select id="windUnit"><option value="kmh">Kilometres per hour</option><option value="mph">Miles per hour</option></select></div><div class="form-field full-field"><label for="settingsLocationInput" data-i18n="preferredLocation">Preferred location</label><div class="input-with-action"><input id="settingsLocationInput" type="text" maxlength="120" placeholder="Search and select a location from Overview" data-i18n-placeholder="locationManageHint"><button type="button" class="button button-outline button-small" data-nav="home" data-i18n="changeLocation">Change</button></div><small class="field-help" id="settingsLocationLabel">Panipat, Haryana, India</small></div></div><div class="settings-divider"></div><div class="form-field"><label data-i18n="topicsMatter">Topics that matter to you</label><p class="field-help" data-i18n="topicsHelp">Choose as many as you like. Your homepage will give these topics more attention.</p><div class="topic-grid" id="topicPreferences"><label class="topic-option"><input type="checkbox" value="farm"><span class="topic-emoji">♧</span><span data-i18n="topicFarm">Farming</span></label><label class="topic-option"><input type="checkbox" value="air"><span class="topic-emoji">≈</span><span data-i18n="topicAir">Air quality</span></label><label class="topic-option"><input type="checkbox" value="commute"><span class="topic-emoji">⇢</span><span data-i18n="topicCommute">Commuting</span></label><label class="topic-option"><input type="checkbox" value="outdoor"><span class="topic-emoji">☼</span><span data-i18n="topicOutdoor">Outdoor work</span></label><label class="topic-option"><input type="checkbox" value="study"><span class="topic-emoji">▤</span><span data-i18n="topicStudy">Study / campus</span></label><label class="topic-option"><input type="checkbox" value="home"><span class="topic-emoji">⌂</span><span data-i18n="topicHome">Home & family</span></label><label class="topic-option"><input type="checkbox" value="business"><span class="topic-emoji">▣</span><span data-i18n="topicBusiness">Business</span></label><label class="topic-option"><input type="checkbox" value="garden"><span class="topic-emoji">❀</span><span data-i18n="topicGarden">Gardening</span></label></div></div><div class="settings-actions"><button class="button button-dark" type="submit" data-i18n="savePreferences">Save preferences</button><button class="button button-outline" id="clearPreferencesButton" type="button" data-i18n="resetPreferences">Reset preferences</button></div><p class="form-feedback" id="preferencesFeedback" role="status" aria-live="polite"></p></form>
+
+            <div class="card adaptation-card"><div class="card-heading"><div><p class="eyebrow" data-i18n="adaptiveEyebrow">QUIETLY LEARNING WHAT HELPS</p><h2 data-i18n="adaptiveTitle">Adaptive dashboard</h2></div><span class="card-heading-icon">✧</span></div><p class="muted-text" data-i18n="adaptiveIntro">With your permission, Atmos can use interactions stored in this browser to highlight sections you return to. It does not infer a guaranteed profession from your behaviour.</p><div class="adaptation-toggle-row"><div><strong data-i18n="personalizationEnabled">Use activity to personalise</strong><p data-i18n="personalizationEnabledNote">Counts section visits and approximate active time locally.</p></div><label class="switch"><input id="adaptiveToggle" type="checkbox"><span class="switch-slider"></span><span class="sr-only">Enable activity-based personalisation</span></label></div><div class="activity-summary" id="activitySummary"><div><span data-i18n="sectionsUsed">Sections used</span><strong id="activitySectionsCount">0</strong></div><div><span data-i18n="visitsRecorded">Visits recorded</span><strong id="activityVisitsCount">0</strong></div><div><span data-i18n="timeInApp">Active time</span><strong id="activityTimeCount">0 min</strong></div></div><div class="activity-previews" id="activityPreviews"><span class="empty-inline" data-i18n="activityEmpty">Use Atmos for a while and your most-used sections will appear here.</span></div><div class="settings-actions"><button class="button button-outline" type="button" id="resetActivityButton" data-i18n="resetActivity">Clear activity history</button></div></div>
+          </div><aside class="settings-side-column"><article class="card privacy-card"><div class="privacy-icon">♧</div><h2 data-i18n="privacyFirst">Private by design.</h2><p data-i18n="privacyFirstText">Preferences, saved tasks and usage counters stay in this browser in this version. Weather requests send the selected coordinates to the public data service.</p><ul class="privacy-list"><li><span>✓</span><span data-i18n="noAccount">No account required</span></li><li><span>✓</span><span data-i18n="noAdTracking">No advertising tracker added</span></li><li><span>✓</span><span data-i18n="locationControl">Location permission is optional</span></li></ul></article><article class="card info-side-card"><span class="card-heading-icon">ⓘ</span><h3 data-i18n="aboutData">About your data</h3><p data-i18n="aboutDataText">Weather and air-quality values are forecasts from Open-Meteo. They can differ from local station measurements. They should support, not replace, official alerts and professional advice.</p><a href="https://open-meteo.com/" target="_blank" rel="noreferrer" data-i18n="dataProvider">Learn about Open-Meteo ↗</a></article><article class="card info-side-card"><span class="card-heading-icon">⇩</span><h3 data-i18n="exportYourData">Export your settings</h3><p data-i18n="exportDataText">Download a JSON backup of saved settings and tasks stored in this browser.</p><button type="button" class="button button-outline button-wide" id="exportDataButton" data-i18n="exportBackup">Export local backup</button><label class="button button-outline button-wide file-button" for="importDataInput" data-i18n="importBackup">Import backup</label><input id="importDataInput" type="file" accept="application/json,.json" hidden></article></aside></div>
+        </section>
+
+        <footer class="app-footer"><div><span class="footer-mark">✳</span><strong>atmos</strong><span data-i18n="footerTagline">Useful weather for real life.</span></div><div><span data-i18n="footerPowered">Weather and air quality data by</span> <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a><span class="footer-separator">·</span><span data-i18n="footerModels">Modelled data, local decisions.</span></div><button type="button" class="footer-link" id="openDataNoteButton" data-i18n="dataAndSafety">Data & safety notes</button></footer>
+      </main>
+    </div>
+  </div>
+
+  <!-- Optional setup: never blocks the universal homepage -->
+  <dialog class="setup-dialog" id="setupDialog" aria-labelledby="setupDialogTitle">
+    <form method="dialog" class="dialog-close-row"><button class="icon-only" value="cancel" aria-label="Close setup">×</button></form>
+    <div class="dialog-symbol">✳</div><p class="eyebrow" data-i18n="quickSetupEyebrow">A BETTER FIT, IN A FEW CLICKS</p><h2 id="setupDialogTitle" data-i18n="quickSetupTitle">What matters in your day?</h2><p class="dialog-intro" data-i18n="quickSetupIntro">Choose a starting point. You can change everything later, or skip this entirely.</p>
+    <form id="quickSetupForm" class="quick-setup-form"><div class="form-field"><label for="quickProfile" data-i18n="mainExperience">Main experience</label><select id="quickProfile"><option value="everyday">Everyday life</option><option value="farmer">Farm & agriculture</option><option value="student">School / college</option><option value="commuter">Commuting / office</option><option value="outdoor">Outdoor work</option><option value="delivery">Delivery / driving</option><option value="business">Shop / small business</option><option value="home">Home & family</option></select></div><div class="form-field"><label for="quickLanguage" data-i18n="interfaceLanguage">Interface language</label><select id="quickLanguage"><option value="en">English</option><option value="hi">हिन्दी — Hindi</option><option value="pa">ਪੰਜਾਬੀ — Punjabi</option></select></div><div class="form-field"><label for="quickLocation" data-i18n="locationOptional">Location (optional)</label><input id="quickLocation" type="text" placeholder="Search for a place on the Overview page" data-i18n-placeholder="quickLocationHint" maxlength="120"><small class="field-help" data-i18n="setupLocationHelp">You can select a location from Overview, or use the location button if you choose.</small></div><label class="check-row setup-adaptive-check"><input type="checkbox" id="quickAdaptive" checked><span data-i18n="allowAdaptive">Let Atmos use local activity patterns to reorder suggestions</span></label><div class="dialog-actions"><button type="button" class="button button-outline" id="skipSetupButton" data-i18n="skipForNow">Skip for now</button><button type="submit" class="button button-dark" data-i18n="saveAndPersonalize">Save and personalise</button></div><p id="setupFeedback" class="form-feedback" role="status"></p></form>
+  </dialog>
+
+  <dialog class="notice-dialog" id="noticeDialog" aria-labelledby="noticeDialogTitle"><form method="dialog" class="dialog-close-row"><button class="icon-only" value="cancel" aria-label="Close">×</button></form><div class="dialog-symbol">ⓘ</div><h2 id="noticeDialogTitle" data-i18n="dataSafetyTitle">Data and safety notes</h2><div class="notice-copy" id="dataNoticeCopy"><p>Atmos provides general planning information based on weather and air-quality forecast models. Values can be delayed, incomplete or different from conditions at your exact location.</p><p>Use official local alerts for emergency decisions. Farm prompts are not crop-specific professional advice and cannot determine irrigation needs, pesticide suitability, or harvest readiness by themselves. Follow local agricultural guidance and all product labels.</p><p>Your saved app preferences, tasks and usage summaries are stored in your browser. Using a weather search or current-location weather sends coordinates to Open-Meteo's public APIs to fetch forecast data.</p></div><div class="dialog-actions"><button class="button button-dark" type="button" id="closeNoticeButton" data-i18n="understood">Understood</button></div></dialog>
+
+  <div class="toast-region" id="toastRegion" role="status" aria-live="polite" aria-atomic="true"></div>
+  <noscript><div class="noscript-notice">Atmos needs JavaScript enabled to retrieve live weather, update charts and save your preferences.</div></noscript>
+</body>
+</html>
